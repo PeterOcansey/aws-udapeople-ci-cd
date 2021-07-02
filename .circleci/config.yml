@@ -123,9 +123,9 @@ jobs:
           name: Scan backend for vulnerabilities
           command: |
             cd backend
-            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
       - slack/notify:
-          event: pass
+          event: fail
           template: basic_fail_1
             
 workflows:
