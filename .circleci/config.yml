@@ -132,7 +132,7 @@ jobs:
           template: success_tagged_deploy_1
   
 
-  ########### Create and Deploy Infrastructure ###########
+  ########### Create and Deploy Infrastructure ############
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
