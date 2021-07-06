@@ -146,11 +146,11 @@ jobs:
               --tags project=udapeople \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
-              
+
       - run:
           name: Export Back-end url to memstash.io
           command: |
-            PUBLIC_DNS=$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            PUBLIC_DNS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" --query "Reservations[*].Instances[0].PublicDnsName" --output text)
             echo ${PUBLIC_DNS}
             curl -H "Content-Type: text/plain" \
                  -H "token: ${CIRCLE_WORKFLOW_ID}" \
