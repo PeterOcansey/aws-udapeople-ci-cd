@@ -185,7 +185,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - /project/.circleci/ansible/inventory.txt
             #- project/.circleci/ansible/inventory.txt
       - destroy-environment
           #when_to_run: on_fail
@@ -194,17 +194,17 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend
-      - build-backend
-      - test-frontend:
-          requires: [build-frontend]
-      - test-backend:
-          requires: [build-backend]
-      - scan-backend:
-          requires: [build-backend]
-          context:
-            - CircleCISlackContext
-      - scan-frontend:
-          requires: [build-frontend]
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      #- build-frontend
+      #- build-backend
+      #- test-frontend:
+      #    requires: [build-frontend]
+      #- test-backend:
+      #    requires: [build-backend]
+      #- scan-backend:
+      #    requires: [build-backend]
+      #    context:
+      #      - CircleCISlackContext
+      #- scan-frontend:
+      #    requires: [build-frontend]
+      - deploy-infrastructure
+        #  requires: [test-frontend, test-backend, scan-frontend, scan-backend]
