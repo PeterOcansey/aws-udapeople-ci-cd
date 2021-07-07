@@ -183,7 +183,7 @@ jobs:
                 --query "Reservations[*].Instances[0].PublicIpAddress" \
                 --output text >> ansible/inventory
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
