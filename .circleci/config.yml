@@ -177,7 +177,7 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            echo "192.168.1.2" >> ansible/inventory.txt
+            echo "192.168.1.2" >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
