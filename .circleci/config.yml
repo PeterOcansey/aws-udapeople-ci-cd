@@ -7,11 +7,14 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here   
+      # Add parameter here 
+      when_to_run:
+        type: string
+        default: "on_fail"  
     steps:
       - run:
           name: Destroy environments
-          #when: on_fail
+          when: << parameters.when_to_run >>
           command: |
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID}
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID}
@@ -179,7 +182,7 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
-        when: on_fail
+          when_to_run: on_fail
       # Here's where you will add some code to rollback on failure 
             
 workflows:
