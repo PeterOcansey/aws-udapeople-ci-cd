@@ -7,17 +7,16 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here 
-      when_to_run:
+      stack_to_destroy:
         type: string
         default: "on_fail"  
     steps:
       - run:
-          name: Destroy environments
+          name: Destroy environments "<<parameters.stack_to_destroy>>"
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID}
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID}
+            aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
+            aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
             exit 1
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -177,27 +176,34 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            echo "192.168.1.2" >> .circleci/ansible/inventory.txt
+            aws ec2 describe-instances \
+                --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
+                --query "Reservations[*].Instances[0].PublicIpAddress" \
+                --output text >> .circleci/ansible/inventory.txt
+            exit 1
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
+          stack_to_destroy: udapeople-backend-${CIRCLE_WORKFLOW_ID}
+      - destroy-environment
+          stack_to_destroy: udapeople-frontend-${CIRCLE_WORKFLOW_ID}
             
 workflows:
   default:
     jobs:
-      #- build-frontend
-      #- build-backend
-      #- test-frontend:
-      #    requires: [build-frontend]
-      #- test-backend:
-      #    requires: [build-backend]
-      #- scan-backend:
-      #    requires: [build-backend]
-      #    context:
-      #      - CircleCISlackContext
-      #- scan-frontend:
-      #    requires: [build-frontend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+          context:
+            - CircleCISlackContext
+      - scan-frontend:
+          requires: [build-frontend]
       - deploy-infrastructure
-        #  requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
