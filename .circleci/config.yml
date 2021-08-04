@@ -198,7 +198,7 @@ jobs:
       - run: pip install awscli
       - add_ssh_keys:
           fingerprints: [7d:e5:47:42:66:09:02:d3:0f:e4:77:73:99:10:c1:85]
-       - attach_workspace:
+      - attach_workspace:
           at: ~/
       - run:
           name: Install dependencies
@@ -208,9 +208,9 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-      - destroy-environment
+      - destroy-environment:
           stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
-      - destroy-environment
+      - destroy-environment:
           stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID}" 
             
 workflows:
