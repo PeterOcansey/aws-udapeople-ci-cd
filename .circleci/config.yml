@@ -195,6 +195,7 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - run: pip install awscli
       - add_ssh_keys:
           fingerprints: [7d:e5:47:42:66:09:02:d3:0f:e4:77:73:99:10:c1:85]
        - attach_workspace:
