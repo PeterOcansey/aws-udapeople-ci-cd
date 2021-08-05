@@ -21,7 +21,7 @@ commands:
     parameters:
       # Add parameter here     
     steps:
-      - run:
+      - run: 
           name: Revert migrations
           # Add when this will run
           command: |
@@ -209,7 +209,42 @@ jobs:
       - destroy-environment:
           stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
       - destroy-environment:
-          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID}" 
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
+
+  
+  ########### Run Migrations ############
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - run: 
+          name: Install dependencies
+          command: |
+            sudo apt-get -y -qq update
+            sudo apt-get -y -qq install awscli
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm i
+            npm run migrations:revert
+            npm run migrations >> output.txt
+            exit 1
+      - run:
+          name: Send migration results to memstash
+          command: |
+            cd backend
+            cat output.txt
+            if cat output.txt | grep -q "has been executed sucessfully"; then
+                curl -H "Content-Type: text/plain" -H \ 
+                "token: ${CIRCLE_WORKFLOW_ID} " \ 
+                --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
+            fi
+            exit 1
+      - destroy-environment:
+          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+      - destroy-environment:
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"  
             
 workflows:
   default:
