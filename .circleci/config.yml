@@ -229,7 +229,6 @@ jobs:
             npm i
             npm run migrations:revert
             npm run migrations >> output.txt
-            exit 1
       - run:
           name: Send migration results to memstash
           command: |
@@ -268,3 +267,5 @@ workflows:
               only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
