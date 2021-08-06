@@ -16,6 +16,18 @@ commands:
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name "<<parameters.stack_to_destroy>>"
+  destroy-frontend-bucket:
+    description: Clear Content Of Front-End S3 Bucket.
+    parameters:
+      s3_to_empty:
+        type: string
+        default: "on_fail"
+    steps:
+      - run:
+          name: Clear content of S3 "<<parameters.s3_to_empty>>"
+          when: on_fail
+          command: |
+            aws s3 rm s3://"<<parameters.s3_to_empty>>" --recursive
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
@@ -34,19 +46,6 @@ commands:
             #  Add revert code here. You can find this in the Getting Started section.
               exit 1
             fi
-
-    destroy-frontend-bucket:
-      description: Clear Content Of Front-End S3 Bucket.
-      parameters:
-        s3_to_empty:
-          type: string
-          default: "on_fail" 
-      steps:
-        - run:
-            name: Clear content of S3 "<<parameters.s3_to_empty>>"
-            when: on_fail
-            command: |
-              aws s3 rm s3://"<<parameters.s3_to_empty>>" --recursive
             
 jobs:
   ########### Build Backend & Front Jobs ###########
