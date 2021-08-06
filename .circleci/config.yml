@@ -144,7 +144,6 @@ jobs:
           event: pass
           template: success_tagged_deploy_1
   
-
   ########### Create and Deploy Infrastructure ############
   deploy-infrastructure:
     docker:
@@ -224,7 +223,7 @@ jobs:
           stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   
-  ########### Run Migrations ############
+  ########### Run Migrations #############
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
