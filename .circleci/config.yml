@@ -266,8 +266,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt-get -y -qq update
-            sudo apt-get -y -qq install awscli
+            sudo apt-get -y update
+            sudo apt-get -y install pip
+            pip install awscli
       - run:
           name: Get backend url
           command: |
