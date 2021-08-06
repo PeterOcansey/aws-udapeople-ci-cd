@@ -34,6 +34,18 @@ commands:
             #  Add revert code here. You can find this in the Getting Started section.
               exit 1
             fi
+
+    destroy-frontend-bucket:
+      description: Clear Content Of Front-End S3 Bucket.
+      parameters:
+        s3_to_empty:
+          type: string
+      steps:
+        - run:
+            name: Clear content of S3 "<<parameters.s3_to_empty>>"
+            when: on_fail
+            command: |
+              aws s3 rm s3://"<<parameters.s3_to_empty>>" --recursive
             
 jobs:
   ########### Build Backend & Front Jobs ###########
@@ -149,16 +161,16 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
 
       - run:
           name: Export Back-end url to memstash.io
           command: |
-            PUBLIC_DNS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            PUBLIC_DNS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[*].Instances[0].PublicDnsName" --output text)
             echo ${PUBLIC_DNS}
             curl -H "Content-Type: text/plain" \
-                 -H "token: ${CIRCLE_WORKFLOW_ID}" \
+                 -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
                  --request PUT --data ${PUBLIC_DNS} https://api.memstash.io/values/po_udapeople_dns
 
       - run:
@@ -167,14 +179,14 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
               
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
-                --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
+                --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                 --query "Reservations[*].Instances[0].PublicIpAddress" \
                 --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
@@ -182,9 +194,9 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment:
-          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
-          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   
   ########### Configure Infrastructure ############
@@ -207,9 +219,9 @@ jobs:
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment:
-          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
-          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   
   ########### Run Migrations ############
@@ -217,6 +229,7 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
+      - checkout
       - run: 
           name: Install dependencies
           command: |
@@ -236,13 +249,49 @@ jobs:
             cat output.txt
             if cat output.txt | grep -q "has been executed sucessfully"; then
                 curl -H "Content-Type: text/plain" -H \ 
-                "token: ${CIRCLE_WORKFLOW_ID} " \ 
-                --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
+                "token: ${CIRCLE_WORKFLOW_ID:0:7} " \ 
+                --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
             fi
       - destroy-environment:
-          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
-          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"  
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"  
+
+  
+  ########### Deploy Frontend Application ############
+  deploy-frontend:
+    docker:
+        - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get -y -qq update
+            sudo apt-get -y -qq install awscli
+      - run:
+          name: Get backend url
+          command: |
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:project,Values=udapeople" \
+            --output text >> backend_url.txt
+            BACKEND_IP="$(cat backend_url.txt)"
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm i
+            npm run build
+            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - destroy-frontend-bucket:
+          s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
             
 workflows:
   default:
@@ -268,3 +317,5 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
