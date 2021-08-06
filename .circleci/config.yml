@@ -40,6 +40,7 @@ commands:
       parameters:
         s3_to_empty:
           type: string
+          default: "on_fail" 
       steps:
         - run:
             name: Clear content of S3 "<<parameters.s3_to_empty>>"
