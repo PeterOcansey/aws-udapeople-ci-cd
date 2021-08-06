@@ -292,6 +292,7 @@ jobs:
           stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+    
             
 workflows:
   default:
