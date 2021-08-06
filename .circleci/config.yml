@@ -285,7 +285,7 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
-            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive --debug
       - destroy-frontend-bucket:
           s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
