@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   slack: circleci/slack@4.4.2
+  aws-cli: circleci/aws-cli@2.0.3
 
 commands:
   destroy-environment:
@@ -263,11 +264,12 @@ jobs:
         - image: circleci/node:13.8.0
     steps:
       - checkout
+      - aws-cli/setup
       - run:
           name: Install dependencies
           command: |
             sudo apt-get -y update
-            sudo apt-get -y install awscli
+      #- sudo apt-get -y install awscli
       - run:
           name: Get backend url
           command: |
@@ -285,7 +287,7 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
-        #aws s3 sync ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --region us-west-2
+            aws s3 sync ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --region us-west-2
       - destroy-frontend-bucket:
           s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
