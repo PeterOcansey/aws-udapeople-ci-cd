@@ -320,12 +320,12 @@ jobs:
             zip -r backend.zip backend
             cd /root/project/.circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
-      - destroy-frontend-bucket:
-          s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
-      - destroy-environment:
-          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - destroy-environment:
-          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+      #- destroy-frontend-bucket:
+      #    s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+      #- destroy-environment:
+      #    stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      #- destroy-environment:
+      #    stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
 
 
 ########### Perform  Smoke Test ############
