@@ -1,21 +1,17 @@
-- name: "copy files."
-  become: true
+---
+- name: copy dist backend folder to ec2 server
+  become: yes
   copy:
-    src: /root/project/backend.zip
-    dest: /tmp
+    src: ~/project/artifact.tar.gz
+    dest: /home/ubuntu/artifact.tar.gz
 
-- name: "unzip folder."
+- name: prepare binaries
   become: true
-  unarchive:
-    src: /tmp/backend.zip
-    dest: /home/ubuntu
-    remote_src: yes
-
-- name: "install packages and start up"
   shell: |
-    cd /home/ubuntu/backend
-    sudo npm install -g npm@latest
-    sudo npm install -g webpack-dev-server
-    sudo npm install
-    sudo npm run build
-    sudo pm2 start npm --name backend -- start
+    cd /home/ubuntu
+    tar xvzf artifact.tar.gz -C .
+- name: start server
+  become: true
+  shell: |
+    cd /home/ubuntu
+    pm2 start npm --name backend -- start

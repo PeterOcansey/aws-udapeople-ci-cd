@@ -18,8 +18,11 @@
     update_cache: true
 
 - name: "install nodejs."
-  shell: |
-    curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash - && sudo apt-get install -y nodejs
+  become: true
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
 
 - name: "install pm2."
   become: true

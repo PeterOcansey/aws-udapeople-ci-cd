@@ -295,31 +295,34 @@ jobs:
       - destroy-environment:
           stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
   
-  
-  ########### Deploy Backend Application ############
+
+########### Deploy Backend Application ############
   deploy-backend:
     docker:
-       - image: python:3.7-alpine3.11
+      - image: python:3.9.1-alpine3.12
     steps:
       - checkout
-      - run: pip install awscli
       - add_ssh_keys:
-          fingerprints: [7d:e5:47:42:66:09:02:d3:0f:e4:77:73:99:10:c1:85]
+         fingerprints: [7d:e5:47:42:66:09:02:d3:0f:e4:77:73:99:10:c1:85]
+      - restore_cache:
+          keys: [backend-build]
       - attach_workspace:
-          at: ~/
+          at: /tmp/artifacts
       - run:
           name: Install dependencies
           command: |
             apk update
-            apk add --update ansible
-            apk add --update nodejs npm
-            apk add --update zip  
+            apk add --update ansible aws-cli openssh-client tar
+      - run:
+          name: compress backend
+          command: |
+            tar -C /tmp/artifacts/backend -czvf artifact.tar.gz .
       - run:
           name: Deploy backend
           command: |
-            zip -r backend.zip backend
-            cd /root/project/.circleci/ansible
-            ansible-playbook -i inventory.txt deploy-backend.yml
+            cd .circleci/ansible
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            ansible-playbook -i /tmp/artifacts/inventory.txt deploy-backend.yml
       - destroy-frontend-bucket:
           s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
@@ -364,7 +367,7 @@ jobs:
       #- destroy-environment:
       #   stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
 
-      
+
 
 
 workflows:
