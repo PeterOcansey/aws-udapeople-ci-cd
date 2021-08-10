@@ -29,6 +29,7 @@ commands:
           when: on_fail
           command: |
             aws s3 rm s3://"<<parameters.s3_to_empty>>" --recursive
+            aws s3 rb s3://"<<parameters.s3_to_empty>>" --force
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
@@ -368,16 +369,20 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-             URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-west-2.amazonaws.com"
-             curl -s "${URL}"
-      #- destroy-frontend-bucket:
-      #    s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
-      #- destroy-environment:
-      #    stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      #- destroy-environment:
-      #   stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
-
-
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-west-2.amazonaws.com/#/employees"
+            curl -s "${URL}"
+            if curl -s ${URL} | grep "Welcome";
+            then
+              return 1
+            esle
+              return 0
+            fi
+      - destroy-frontend-bucket:
+          s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+         stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
 
 
 workflows:
