@@ -299,29 +299,25 @@ jobs:
 ########### Deploy Backend Application ############
   deploy-backend:
     docker:
-      - image: python:3.9.1-alpine3.12
+       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - run: pip install awscli
       - add_ssh_keys:
-         fingerprints: [7d:e5:47:42:66:09:02:d3:0f:e4:77:73:99:10:c1:85]
+          fingerprints: [7d:e5:47:42:66:09:02:d3:0f:e4:77:73:99:10:c1:85]
       - attach_workspace:
           at: ~/
-      - restore_cache:
-          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
             apk update
-            apk add --update ansible openssh-client tar gzip
-      - run:
-          name: compress backend
-          command: |
-            cd /home
-            tar czf backend.tar.gz -P /home/circleci/project/backend/dist
+            apk add --update ansible
+            apk add --update nodejs npm
+            apk add --update zip  
       - run:
           name: Deploy backend
           command: |
-            export ANSIBLE_HOST_KEY_CHECKING=False
+            zip -r backend.zip backend
             cd /root/project/.circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-frontend-bucket:
@@ -329,7 +325,7 @@ jobs:
       - destroy-environment:
           stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
-          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
 
 ########### Perform  Smoke Test ############
