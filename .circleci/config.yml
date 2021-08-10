@@ -304,25 +304,26 @@ jobs:
       - checkout
       - add_ssh_keys:
          fingerprints: [7d:e5:47:42:66:09:02:d3:0f:e4:77:73:99:10:c1:85]
+      - attach_workspace:
+          at: ~/
       - restore_cache:
           keys: [backend-build]
-      - attach_workspace:
-          at: /tmp/artifacts/backend
       - run:
           name: Install dependencies
           command: |
             apk update
-            apk add --update ansible aws-cli openssh-client tar
+            apk add --update ansible openssh-client tar gzip
       - run:
           name: compress backend
           command: |
-            tar -C /tmp/artifacts/backend -czvf artifact.tar.gz .
+            cd /home
+            tar czf backend.tar.gz -P /home/circleci/project/backend/dist
       - run:
           name: Deploy backend
           command: |
-            cd .circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i /tmp/artifacts/inventory.txt deploy-backend.yml
+            cd /root/project/.circleci/ansible
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-frontend-bucket:
           s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
