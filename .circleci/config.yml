@@ -6,7 +6,7 @@ orbs:
 
 parameters:
   memestash_token:
-    token: string
+    type: string
     default: "C3853A67-091D-4C73-E4BC-588EF338FDB0-1599756138"
 
 commands:
