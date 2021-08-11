@@ -253,7 +253,8 @@ jobs:
           name: Send migration results to memstash
           command: |
             cd backend
-            if cat output.txt | grep -q "has been executed sucessfully"; 
+            migration_status=$(cat output.txt | grep -c "has been executed sucessfully.");
+            if [ $migration_status > 0 ]; 
             then
                 curl -H "Content-Type: text/plain" -H \ 
                 "token: << pipeline.parameters.memstash_token >>" \ 
