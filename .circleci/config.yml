@@ -45,7 +45,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl -H "token: <<parameters.workflow_id>>" \
+            SUCCESS=$(curl -H "token: << pipeline.parameters.memstash_token >>" \
                --request GET https://api.memstash.io/values/migration_<<parameters.workflow_id>>)
             if(( $SUCCESS==1 )); 
             then
@@ -246,6 +246,7 @@ jobs:
           command: |
             cd backend
             npm i
+            npm run migrations:revert
             npm run migrations >> output.txt
             cat output.txt
       - run:
@@ -362,7 +363,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+            curl -H "token: << pipeline.parameters.memstash_token >>" \
               --request GET https://api.memstash.io/values/po_udapeople_dns \
               > backend-url.txt
       - run:
@@ -382,15 +383,14 @@ jobs:
             esle
               return 0
             fi
-      #- destroy-frontend-bucket:
-      #    s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
-      #- destroy-environment:
-      #    stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-frontend-bucket:
+          s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       #- destroy-environment:
       #    stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
-      #- revert-migrations:
-      #    workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      ##
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 
 workflows:
