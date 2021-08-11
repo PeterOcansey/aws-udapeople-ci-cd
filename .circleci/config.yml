@@ -253,6 +253,7 @@ jobs:
           name: Send migration results to memstash
           command: |
             cd backend
+            cat output.txt
             migration_status=$(cat output.txt | grep -c "has been executed sucessfully.");
             if [ $migration_status > 0 ]; 
             then
@@ -387,8 +388,8 @@ jobs:
           s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      #- destroy-environment:
-      #    stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment:
+          stack_to_destroy: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
