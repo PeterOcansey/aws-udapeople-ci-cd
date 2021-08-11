@@ -256,9 +256,7 @@ jobs:
             migration_status=$(cat output.txt | grep -c "has been executed sucessfully.");
             if [ $migration_status > 0 ]; 
             then
-                curl -H "Content-Type: text/plain" -H \ 
-                "token: << pipeline.parameters.memstash_token >>" \ 
-                --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+              curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash_token >>" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
             fi
       - destroy-environment:
           stack_to_destroy: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
