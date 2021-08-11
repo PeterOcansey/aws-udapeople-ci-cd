@@ -255,7 +255,7 @@ jobs:
             if cat output.txt | grep -q "has been executed sucessfully"; 
             then
                 curl -H "Content-Type: text/plain" -H \ 
-                "token: <<parameters.memstash_token>>" \ 
+                "token: << pipeline.parameters.memstash_token >>" \ 
                 --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
             fi
       - destroy-environment:
