@@ -236,11 +236,11 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - aws-cli/setup
       - run: 
           name: Install dependencies
           command: |
             sudo apt-get -y update
-
       - run:
           name: Run migrations
           command: |
