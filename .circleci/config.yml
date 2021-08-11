@@ -4,6 +4,11 @@ orbs:
   slack: circleci/slack@4.4.2
   aws-cli: circleci/aws-cli@2.0.3
 
+parameters:
+  memestash_token:
+    token: string
+    default: "C3853A67-091D-4C73-E4BC-588EF338FDB0-1599756138"
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -250,7 +255,7 @@ jobs:
             if cat output.txt | grep -q "has been executed sucessfully"; 
             then
                 curl -H "Content-Type: text/plain" -H \ 
-                "token: ${CIRCLE_WORKFLOW_ID:0:7}" \ 
+                "token: <<parameters.memstash_token>>" \ 
                 --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
             fi
       - destroy-environment:
