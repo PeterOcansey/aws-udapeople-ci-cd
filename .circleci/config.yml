@@ -389,9 +389,10 @@ jobs:
 ########### CloudFront Distribution ############
   cloudfront-update:
     docker:
-       - image: amazon/aws-cli
+       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - aws-cli/setup
       - run:
           name: Install dependencies
           command: |
@@ -415,7 +416,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-cloudfront-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "udapeople-green" \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-frontend-bucket:
           s3_to_empty: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
