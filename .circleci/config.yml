@@ -396,7 +396,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-             yum install -y curl
+             sudo apt install -y curl
       - run:
           name: Save old stack workflow id
           command: |
@@ -431,13 +431,14 @@ jobs:
 ########### Cleanup ############
   cleanup:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:13.8.0
     steps:
       - checkout
+      - aws-cli/setup
       - run:
           name: Install dependencies
           command: |
-            yum install -y curl
+            sudo apt install -y curl
       - run:
           name: Get old stack workflow id
           command: |
