@@ -440,7 +440,7 @@ jobs:
           command: |
             sudo apt install -y curl
       - run:
-          name: Get old stack workflow id
+          name: Remove old stacks and files
           command: |
             export OldWorkflowID=$(curl -H "token: << pipeline.parameters.memstash_token >>" \
                   --request GET https://api.memstash.io/values/udapeople_oldworkflow)
@@ -450,12 +450,7 @@ jobs:
 
             echo "${OldWorkflowID}"
             echo "${STACKS[@]}"
-      - run:
-          name: Remove old stacks and files
-          command: |
-            echo "${OldWorkflowID}"
-            echo "${STACKS[@]}"
-            
+
             if [ ! -z "${OldWorkflowID}" ];then
               if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
               then
